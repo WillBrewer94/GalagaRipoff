@@ -6,7 +6,9 @@ public class Enemy : MonoBehaviour {
     public float lineSpeed;
     public float circleSpeed;
     public Vector2 endLoc;
+    public GameObject bullet;
     float frameCount;
+    public bool isFinished = false;
 
 	// Use this for initialization
 	void Start () {
@@ -23,16 +25,23 @@ public class Enemy : MonoBehaviour {
     }
 
     void OnCollisionEnter2D(Collision2D col) {
-        Debug.Log(col.gameObject.tag);
-
         if(col.gameObject.tag == "Enemy") {
             Physics2D.IgnoreCollision(GetComponent<Collider2D>(), col.collider);
         }
 
-        if(col.gameObject.tag == "Bullet") {
+        if(col.gameObject.tag == "Bullet" && col.gameObject.GetComponent<Bullet>().isPlayer) {
             Destroy(col.gameObject);
-            Destroy(this.gameObject);
+            Destroy(gameObject);
+            GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().IncScore();
         }
+    }
+
+    public void FireBullet() {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        GameObject newBullet = (GameObject) Instantiate(bullet, transform.position, Quaternion.identity);
+
+        newBullet.GetComponent<Bullet>().SetIsPlayer(false);
+        newBullet.GetComponent<Bullet>().SetTarget(player.transform.position);
     }
 
     IEnumerator LineMove(Vector3 target) {
@@ -45,6 +54,7 @@ public class Enemy : MonoBehaviour {
             yield return null;
         }
 
+        FireBullet();
         StartCoroutine(CircleMove());
     }
 
@@ -52,7 +62,7 @@ public class Enemy : MonoBehaviour {
         float totalRadians = 0;
 
         while(totalRadians < 250) {
-            frameCount -= Time.fixedDeltaTime * circleSpeed;
+            frameCount -= Time.deltaTime * circleSpeed;
             
             totalRadians += Mathf.Abs(frameCount);
 
@@ -74,5 +84,7 @@ public class Enemy : MonoBehaviour {
 
             yield return null;
         }
+
+        isFinished = true;
     }
 }

@@ -16,6 +16,7 @@ public class PlayerInput : MonoBehaviour {
 
         if(Input.GetKeyDown(KeyCode.Space)) {
             GameObject bullet = (GameObject) Instantiate(bulletPrefab, player.transform.position, Quaternion.identity);
+            bullet.GetComponent<Bullet>().SetIsPlayer(true);
         }
 
         player.SetDirectionalInput(dirInput);
